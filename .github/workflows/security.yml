@@ -12,7 +12,7 @@ jobs:
 
       - name: Scan for secrets
         run: |
-          if grep -Ri "password" *.html; then
+          if grep -Ri "password" .; then
             echo "Found risky word"
             exit 1
           else
