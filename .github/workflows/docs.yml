@@ -53,7 +53,7 @@ jobs:
 
       - name: Commit file
         run: |
-          git pull --rebase
+          git pull --rebase --autostash
           git add docs/developer-guide.md
           git commit -m "update developer guide" || echo "no changes"
           git push
