@@ -49,7 +49,7 @@ jobs:
 
       - name: Generate file
         run: |
-          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md
+           jq -r '.output_text' docs/output.json > docs/developer-guide.md
 
       - name: Commit file
         run: |
