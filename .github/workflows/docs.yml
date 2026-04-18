@@ -21,24 +21,26 @@ jobs:
 
       - name: Call OpenAI API
         run: |
+          CONTENT=$(cat index.html)
+
           curl https://api.openai.com/v1/responses \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -d '{
-              "model": "gpt-4.1-mini",
-              "input": "Explain what this HTML file does and generate a flowchart"
-            }' > docs/output.json
+            -d "{
+              \"model\": \"gpt-4.1-mini\",
+              \"input\": \"Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Here is the code:\n$CONTENT\"
+            }" > docs/output.json
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Generate file
         run: |
-          echo "# Developer Guide" > docs/developer-guide.md
-          echo "This project uses CI/CD with a security check." >> docs/developer-guide.md
+          cp docs/output.json docs/developer-guide.md
 
       - name: Commit file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/developer-guide.md
-          git commit -m "add docs" || echo "no changes"
+          git commit -m "update developer guide" || echo "no changes"
+          git push
