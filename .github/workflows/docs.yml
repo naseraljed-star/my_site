@@ -47,50 +47,31 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Debug API response
+      - name: Show API response
         run: |
-          echo "=== Full API Response ==="
+          echo "=== API RESPONSE ==="
           cat docs/output.json
           echo ""
-          echo "=== Response Keys ==="
-          cat docs/output.json | jq 'keys'
-          echo ""
-          echo "=== Trying different extraction paths ==="
-          echo "Path: .output[0].content[0].text"
-          cat docs/output.json | jq -r '.output[0].content[0].text' 2>&1 || echo "FAILED"
-          echo ""
-          echo "Path: .choices[0].message.content"
-          cat docs/output.json | jq -r '.choices[0].message.content' 2>&1 || echo "FAILED"
-          echo ""
-          echo "Path: .data[0].content[0].text"
-          cat docs/output.json | jq -r '.data[0].content[0].text' 2>&1 || echo "FAILED"
-          echo ""
-          echo "Path: .text"
-          cat docs/output.json | jq -r '.text' 2>&1 || echo "FAILED"
-          echo ""
-          echo "Path: .response"
-          cat docs/output.json | jq -r '.response' 2>&1 || echo "FAILED"
+          echo "=== END OF RESPONSE ==="
 
       - name: Generate file
         run: |
-          # Try multiple paths and use the first that works
-          CONTENT=$(cat docs/output.json | jq -r '
-            .output[0].content[0].text // 
-            .choices[0].message.content // 
-            .data[0].content[0].text // 
-            .text // 
-            .response // 
-            "No content found"
-          ')
-          
-          echo "$CONTENT" > docs/developer-guide.md
-          
-          if [ "$CONTENT" = "No content found" ] || [ -z "$CONTENT" ]; then
-            echo "❌ Extraction failed. Check debug output above."
+          # Check if response has error
+          if cat docs/output.json | jq -e '.error' > /dev/null; then
+            echo "API Error:"
+            cat docs/output.json | jq '.error'
             exit 1
-          else
-            echo "✅ Successfully extracted content"
           fi
+          
+          # Try different extraction paths
+          echo "Trying to extract content..."
+          cat docs/output.json | jq '.'
+          
+          # Extract with correct path
+          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md 2>&1
+          
+          echo "Extracted content:"
+          cat docs/developer-guide.md
 
       - name: Commit file
         run: |
