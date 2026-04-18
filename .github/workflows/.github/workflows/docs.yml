@@ -1,0 +1,58 @@
+name: Generate Docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+
+      - name: Create docs folder
+        run: mkdir -p docs
+
+      - name: Generate developer document
+        run: |
+          cat <<'EOF' > docs/developer-guide.md
+          # Developer Guide
+
+          ## Project
+          Simple website used to demonstrate secure CI/CD.
+
+          CI/CD = Continuous Integration / Continuous Delivery
+
+          ## Files
+          - index.html = website
+          - profile.jpg = image
+          - security.yml = security check
+          - docs.yml = document generator
+
+          ## Security
+          The pipeline scans for risky words like "password".
+          If found → build fails.
+
+          ## Flow
+          ```mermaid
+          flowchart TD
+              A[Code change] --> B[Push]
+              B --> C[Security check]
+              C --> D{Risk found?}
+              D -- Yes --> E[Fail]
+              D -- No --> F[Generate docs]
+          ```
+
+          ## Rule
+          Never store secrets in code
+          EOF
+
+      - name: Commit docs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/developer-guide.md
+          git diff --cached --quiet || git commit -m "update docs"
+          git push
