@@ -21,21 +21,35 @@ jobs:
 
       - name: Call OpenAI API
         run: |
-          CONTENT=$(cat index.html)
+          CONTENT=$(jq -Rs . < index.html)
 
           curl https://api.openai.com/v1/responses \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d "{
               \"model\": \"gpt-4.1-mini\",
-              \"input\": \"Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Here is the code:\n$CONTENT\"
+              \"input\": [
+                {
+                  \"role\": \"user\",
+                  \"content\": [
+                    {
+                      \"type\": \"input_text\",
+                      \"text\": \"Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Here is the code:\"
+                    },
+                    {
+                      \"type\": \"input_text\",
+                      \"text\": $CONTENT
+                    }
+                  ]
+                }
+              ]
             }" > docs/output.json
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Generate file
         run: |
-          cp docs/output.json docs/developer-guide.md
+          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md
 
       - name: Commit file
         run: |
