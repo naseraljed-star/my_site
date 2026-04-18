@@ -47,31 +47,9 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Show API response
-        run: |
-          echo "=== API RESPONSE ==="
-          cat docs/output.json
-          echo ""
-          echo "=== END OF RESPONSE ==="
-
       - name: Generate file
         run: |
-          # Check if response has error
-          if cat docs/output.json | jq -e '.error' > /dev/null; then
-            echo "API Error:"
-            cat docs/output.json | jq '.error'
-            exit 1
-          fi
-          
-          # Try different extraction paths
-          echo "Trying to extract content..."
-          cat docs/output.json | jq '.'
-          
-          # Extract with correct path
-          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md 2>&1
-          
-          echo "Extracted content:"
-          cat docs/developer-guide.md
+          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md
 
       - name: Commit file
         run: |
