@@ -57,3 +57,5 @@ jobs:
           git add docs/developer-guide.md
           git commit -m "update developer guide" || echo "no changes"
           git push
+
+          # trigger
