@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create docs folder
         run: mkdir -p docs
@@ -23,7 +23,7 @@ jobs:
         run: |
           CONTENT=$(jq -Rs . < index.html)
 
-          curl https://api.openai.com/v1/responses \
+          curl -s https://api.openai.com/v1/responses \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d "{
@@ -49,7 +49,12 @@ jobs:
 
       - name: Generate file
         run: |
-           jq -r '.output_text' docs/output.json > docs/developer-guide.md
+          jq -r '.output[0].content[0].text' docs/output.json > docs/developer-guide.md
+          
+          if [ ! -s docs/developer-guide.md ] || grep -q "^null$" docs/developer-guide.md; then
+            echo "❌ Extraction failed"
+            exit 1
+          fi
 
       - name: Commit file
         run: |
