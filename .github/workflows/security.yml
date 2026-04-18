@@ -12,7 +12,7 @@ jobs:
 
       - name: Scan for secrets
         run: |
-          if grep -r "password" --exclude=security.yml .; then
+          if grep -Ri "password" . --exclude=security.yml; then
             echo "Found risky word"
             exit 1
           else
