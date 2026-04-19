@@ -1,25 +1,25 @@
+```markdown
 # Developer Guide
 
-## 1) Project Overview
-This project is a personal portfolio website for Naser Aljed, a cybersecurity student. It showcases Naser's profile, interests in cybersecurity, and provides links to external resources such as personal GitHub and Google.
+## 1. Project Overview
+This project is a simple personal website for "Naser Aljed," a cybersecurity student. The website serves as an online profile showcasing Naser's background, interests, and contact information. It includes links to external resources relevant to Naser's work and interests.
 
-## 2) Language Used
-- HTML for structure and content
-- CSS for styling and layout
+## 2. Language Used
+- **HTML**: Structure and content of the webpage.
+- **CSS**: Styling and layout of the webpage.
 
-## 3) Website Purpose
-The purpose of the website is to present a brief introduction of Naser Aljed, including his educational focus on cybersecurity, while also providing contact information and links to relevant resources.
+## 3. Website Purpose
+The website aims to introduce Naser Aljed to visitors and provide information about his educational background in cybersecurity. It includes a brief about section and links to external sites like Google and GitHub for further exploration of his work.
 
-## 4) User Flow
-
+## 4. User Flow
 ```mermaid
 flowchart TD
-    A[User Visits Website] --> B{Homepage}
-    B --> C[View Profile Image]
-    B --> D[Read About Me Section]
-    B --> E[Contact Information]
-    B --> F[View External Links]
-    E --> G[Email Naser]
-    F --> H[Open Google]
-    F --> I[Visit GitHub]
+    A[Visitor visits website] --> B[View profile picture]
+    A --> C[Read name and role]
+    A --> D[Read about section]
+    A --> E[Check contact information]
+    A --> F[Click on buttons]
+    F --> G[Open Google]
+    F --> H[Open GitHub]
+```
 ```
