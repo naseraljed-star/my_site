@@ -1,0 +1,14 @@
+{
+  "model": "gpt-4o-mini",
+  "input": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Return the answer in Markdown only. Here is the code:\n<!DOCTYPE html>\n<html>\n<head>\n    <title>Naser Site</title>\n    <style>\n        body {\n            background-color: #f5f5f5;\n            color: #111;\n            font-family: Arial;\n            text-align: center;\n\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            margin: 0;\n        }\n\n        h1 {\n            color: #2563eb;\n        }\n\n        .card {\n            background-color: white;\n            padding: 20px;\n            width: 300px;\n            border-radius: 10px;\n            box-shadow: 0 0 10px rgba(0,0,0,0.1);\n        }\n\n        button {\n            padding: 10px;\n            margin: 10px;\n            border: none;\n            border-radius: 5px;\n            cursor: pointer;\n            background-color: #2563eb;\n            color: white;\n        }\n\n        a {\n            color: #2563eb;\n            text-decoration: none;\n        }\n\n        a:hover {\n            text-decoration: underline;\n        }\n    </style>\n</head>\n<body>\n\n<div class=\"card\">\n    <img src=\"profile.jpg\" width=\"120\" style=\"border-radius:50%;\">\n\n    <h1>Naser Aljed</h1>\n    <p>Cybersecurity Student</p>\n\n    <h2>About me</h2>\n    <p>I am learning cybersecurity and building my first website</p>\n\n    <p>Contact: <a href=\"mailto:your_email@example.com\">your_email@example.com</a></p>\n\n    <a href=\"https://www.google.com\" target=\"_blank\">\n        <button>Open Google</button>\n    </a>\n\n    <a href=\"https://github.com/naseraljed-star\" target=\"_blank\">\n        <button>My GitHub</button>\n    </a>\n</div>\n\n</body>\n</html>"
+        }
+      ]
+    }
+  ]
+}
