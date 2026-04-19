@@ -1,24 +1,26 @@
-# Developer Guide
+```markdown
+# Developer Guide for Naser Site
 
 ## 1. Project Overview
-This project is a simple personal website created by Naser Aljed. It serves as a portfolio to showcase Naser’s background as a cybersecurity student and includes links to other resources like Google and his GitHub profile.
+Naser Site is a personal webpage that serves as an introduction to Naser Aljed. It showcases basic information about him, including his studies in cybersecurity, as well as links to his email and social media profiles.
 
 ## 2. Language Used
-- **HTML**: To structure the content of the webpage.
-- **CSS**: To style the webpage for a visually appealing layout.
+- **HTML**: Structure of the webpage
+- **CSS**: Styling for layout, colors, and presentation
 
 ## 3. Website Purpose
-The website aims to introduce Naser Aljed and provide information about his studies in cybersecurity. It also includes functionality to contact him via email and links to external resources, enhancing connectivity and visibility for his work.
+The primary purpose of the Naser Site is to provide a simple and clean presentation of Naser Aljed's personal information, facilitate contact through email, and guide users to his GitHub profile.
 
 ## 4. User Flow
 
 ```mermaid
-graph TD;
-    A[User visits Naser's Site] --> B[View profile picture and name];
-    B --> C[Read about me section];
-    C --> D[View contact information];
-    D --> E[Click "Open Google" Button];
-    D --> F[Click "My GitHub" Button];
-    E --> G[Redirects to Google];
-    F --> H[Redirects to Naser's GitHub];
+flowchart TD
+    A[User arrives at Naser Site] --> B[View Profile Picture]
+    A --> C[Read Name and Description]
+    A --> D[Read About Me Section]
+    A --> E[Contact Information]
+    E -->|Click| F[Open Email Client]
+    A --> G[Open Google]
+    A --> H[Visit GitHub Profile]
+```
 ```
