@@ -10,11 +10,26 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3
 
-      - name: Scan for secrets
+      - name: Scan for hardcoded secrets and sensitive files
         run: |
-          if grep -Ri "password" . --exclude=security.yml --exclude=docs.yml --exclude-dir=docs; then
-            echo "Found risky word"
+          echo "Checking for risky words..."
+
+          if grep -RniE '(password|api[_-]?key|token|secret|OPENAI_API_KEY|BEGIN PRIVATE KEY)' . \
+            --exclude=security.yml \
+            --exclude=docs.yml \
+            --exclude-dir=.git \
+            --exclude-dir=docs; then
+            echo "Found risky content"
             exit 1
-          else
-            echo "Clean"
           fi
+
+          echo "Checking for sensitive files..."
+
+          if find . \( -name ".env" -o -name "*.pem" -o -name "*.key" \) \
+            -not -path "./.git/*" \
+            -not -path "./docs/*" | grep .; then
+            echo "Found sensitive file"
+            exit 1
+          fi
+
+          echo "Security check passed"
