@@ -1,15 +1,17 @@
 name: Generate Docs
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Security Check"]
+    types:
+      - completed
 
 permissions:
   contents: write
 
 jobs:
   docs:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
