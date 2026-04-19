@@ -21,41 +21,45 @@ jobs:
 
       - name: Call OpenAI API
         run: |
-          CONTENT=$(jq -Rs . < index.html)
+          CONTENT=$(cat index.html)
+
+          jq -n --arg content "$CONTENT" '{
+            model: "gpt-4o-mini",
+            input: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "input_text",
+                    text: ("Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Return the answer in Markdown only. Here is the code:\n" + $content)
+                  }
+                ]
+              }
+            ]
+          }' > docs/request.json
 
           curl -s https://api.openai.com/v1/responses \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -d "{
-              \"model": "gpt-4o-mini",
-              \"input\": [
-                {
-                  \"role\": \"user\",
-                  \"content\": [
-                    {
-                      \"type\": \"input_text\",
-                      \"text\": \"Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Here is the code:\"
-                    },
-                    {
-                      \"type\": \"input_text\",
-                      \"text\": $CONTENT
-                    }
-                  ]
-                }
-              ]
-            }" > docs/output.json
+            -d @docs/request.json > docs/output.json
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Generate file
         run: |
-              cat docs/output.json > docs/developer-guide.md
+          TEXT=$(jq -r '.output[0].content[0].text // .output_text // empty' docs/output.json)
+
+          if [ -n "$TEXT" ]; then
+            printf "%s\n" "$TEXT" > docs/developer-guide.md
+          else
+            cat docs/output.json > docs/developer-guide.md
+          fi
 
       - name: Commit file
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash
-          git add docs/developer-guide.md
+          git add docs/developer-guide.md docs/output.json docs/request.json
           git commit -m "update developer guide" || echo "no changes"
           git push
-
-          # trigger
