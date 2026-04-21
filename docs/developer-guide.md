@@ -1,4 +1,3 @@
-```markdown
 # Developer Guide
 
 ## 1. Project Overview
@@ -20,5 +19,4 @@ flowchart TD
     D --> E{Select action}
     E -->|Open Google| F[Redirect to Google]
     E -->|Visit GitHub| G[Redirect to GitHub]
-```
 ```
