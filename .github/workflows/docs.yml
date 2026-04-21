@@ -23,24 +23,24 @@ jobs:
 
       - name: Call OpenAI API
         run: |
-          CONTENT=$(cat index.html)
-
+          # Read the HTML file and escape it for JSON
+          CONTENT=$(cat index.html | jq -Rs .)
+          
+          # Use the correct Chat Completions API format
           jq -n --arg content "$CONTENT" '{
             model: "gpt-4o-mini",
-            input: [
+            messages: [
               {
                 role: "user",
-                content: [
-                  {
-                    type: "input_text",
-                    text: ("Read this website code and generate a short developer guide in Markdown only.\n\nImportant instructions:\n- Use exact visible labels from the HTML.\n- Do not replace exact labels with general words.\n- Do not invent features or steps that are not present in the HTML.\n- The Mermaid flowchart must show the user journey in sequence, starting from landing on the homepage, then viewing the profile content, then reaching the available action buttons or links.\n- If multiple buttons or links exist, show them as separate branches from one decision step.\n- Use the exact button and link labels as they appear in the HTML.\n- Include ALL buttons or links found in the HTML exactly as written.\n- Do not limit the flowchart to fixed examples.\n- Do not create isolated mini-flows. Keep one connected flowchart.\n\nReturn this structure only:\n# Developer Guide\n\n## 1. Project Overview\n## 2. Language Used\n## 3. Website Purpose\n## 4. User Flow\n\nUnder \"User Flow\", return a Mermaid flowchart only.\n\nHere is the code:\n" + $content)
-                  }
-                ]
+                content: "Read this website code and generate a short developer guide in Markdown only.\n\nImportant instructions:\n- Use exact visible labels from the HTML.\n- Do not replace exact labels with general words.\n- Do not invent features or steps that are not present in the HTML.\n- The Mermaid flowchart must show the user journey in sequence, starting from landing on the homepage, then viewing the profile content, then reaching the available action buttons or links.\n- If multiple buttons or links exist, show them as separate branches from one decision step.\n- Use the exact button and link labels as they appear in the HTML.\n- Include ALL buttons or links found in the HTML exactly as written.\n- Do not limit the flowchart to fixed examples.\n- Do not create isolated mini-flows. Keep one connected flowchart.\n\nReturn this structure only:\n# Developer Guide\n\n## 1. Project Overview\n## 2. Language Used\n## 3. Website Purpose\n## 4. User Flow\n\nUnder \"User Flow\", return a Mermaid flowchart only.\n\nHere is the code:\n\n" + $content
               }
-            ]
+            ],
+            max_tokens: 2000,
+            temperature: 0.7
           }' > docs/request.json
 
-          curl -s https://api.openai.com/v1/responses \
+          # Make the API call to the correct endpoint
+          curl -s https://api.openai.com/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @docs/request.json > docs/output.json
@@ -49,23 +49,32 @@ jobs:
 
       - name: Generate file
         run: |
-          TEXT=$(jq -r '.output[0].content[] | select(.type=="output_text") | .text' docs/output.json)
+          # Extract the content from the Chat Completions response
+          TEXT=$(jq -r '.choices[0].message.content // empty' docs/output.json)
 
-          if [ -n "$TEXT" ]; then
+          if [ -n "$TEXT" ] && [ "$TEXT" != "null" ]; then
             printf "%s\n" "$TEXT" > docs/developer-guide.md
+            echo "✅ Developer guide generated successfully"
           else
-            echo "No valid output_text found" > docs/developer-guide.md
+            echo "❌ Failed to extract content from API response"
+            echo "API Response:" 
+            cat docs/output.json
+            echo "# Developer Guide - Generation Failed" > docs/developer-guide.md
+            echo "" >> docs/developer-guide.md
+            echo "The API request failed. Check workflow logs for details." >> docs/developer-guide.md
+            exit 1
           fi
 
       - name: Fix Mermaid formatting
         run: |
           sed -i 's/``` mermaid/```mermaid/g' docs/developer-guide.md
+          sed -i 's/````mermaid/```mermaid/g' docs/developer-guide.md
 
       - name: Commit file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash
-          git add docs/developer-guide.md docs/output.json docs/request.json
+          git pull --rebase --autostash || true
+          git add docs/developer-guide.md docs/request.json docs/output.json
           git commit -m "update developer guide" || echo "no changes"
-          git push
+          git push || true
