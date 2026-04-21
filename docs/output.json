@@ -1,13 +1,13 @@
 {
-  "id": "resp_0d8d534d133d34e50069e7faf4f3f4819187485e428d71a865",
+  "id": "resp_0a49d7def39bca3f0069e801fbb6e081a1acaffdf87823973c",
   "object": "response",
-  "created_at": 1776810740,
+  "created_at": 1776812539,
   "status": "completed",
   "background": false,
   "billing": {
     "payer": "developer"
   },
-  "completed_at": 1776810743,
+  "completed_at": 1776812542,
   "error": null,
   "frequency_penalty": 0.0,
   "incomplete_details": null,
@@ -18,7 +18,7 @@
   "moderation": null,
   "output": [
     {
-      "id": "msg_0d8d534d133d34e50069e7faf6598c8191b6e0aa265242bc20",
+      "id": "msg_0a49d7def39bca3f0069e801fc644881a1ba97ef7700b53f8a",
       "type": "message",
       "status": "completed",
       "content": [
@@ -26,7 +26,7 @@
           "type": "output_text",
           "annotations": [],
           "logprobs": [],
-          "text": "# Developer Guide\n\n## 1. Project Overview\nThis project is a personal website for Naser Aljed, showcasing his profile as a cybersecurity student.\n\n## 2. Language Used\n- HTML\n- CSS\n\n## 3. Website Purpose\nThe purpose of this website is to introduce Naser Aljed, outline his interests in cybersecurity, and provide contact information alongside links to useful resources.\n\n## 4. User Flow\n```mermaid\nflowchart TD\n    A[Open Google]\n    B[My GitHub]\n    C[My LinkedIn]\n    \n    A -->|Click| D[Open Google]\n    B -->|Click| E[My GitHub]\n    C -->|Click| F[My LinkedIn]\n```"
+          "text": "# Developer Guide\n\n## 1. Project Overview\nThis project is a personal website for Naser Aljed, showcasing his profile as a Cybersecurity Student.\n\n## 2. Language Used\nThe website is built using HTML and CSS.\n\n## 3. Website Purpose\nThe purpose of the website is to present Naser Aljed, provide basic information about him, and link to his external profiles.\n\n## 4. User Flow\n\n```mermaid\nflowchart TD\n    A[Landing on Homepage] --> B[Viewing Profile Content]\n    B --> C[Available Action Buttons/Links]\n    C -->|Open Google| D[Open Google]\n    C -->|My GitHub| E[My GitHub]\n    C -->|My LinkedIn| F[My LinkedIn]\n```"
         }
       ],
       "role": "assistant"
@@ -57,15 +57,15 @@
   "top_p": 1.0,
   "truncation": "disabled",
   "usage": {
-    "input_tokens": 1028,
+    "input_tokens": 1085,
     "input_tokens_details": {
       "cached_tokens": 0
     },
-    "output_tokens": 153,
+    "output_tokens": 163,
     "output_tokens_details": {
       "reasoning_tokens": 0
     },
-    "total_tokens": 1181
+    "total_tokens": 1248
   },
   "user": null,
   "metadata": {}
