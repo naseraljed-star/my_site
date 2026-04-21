@@ -33,7 +33,7 @@ jobs:
                 content: [
                   {
                     type: "input_text",
-                    text: ("Read this website code and generate a short developer guide with: 1) project overview, 2) language used, 3) website purpose, 4) a Mermaid flowchart showing user flow. Return the answer in Markdown only. Here is the code:\n" + $content)
+                    text: ("Read this website code and generate a short developer guide in Markdown only.\n\nImportant instructions:\n- Use exact visible labels from the HTML.\n- Do not replace exact labels with general words.\n- Do not write phrases like '\''social media button'\'' or '\''external links'\'' if the HTML contains specific labels.\n- If the HTML contains buttons labelled '\''Open Google'\'', '\''My GitHub'\'', and '\''My LinkedIn'\'', the Mermaid flowchart must include those exact labels separately.\n- In the Mermaid flowchart, list each button/action as a separate node using its exact label.\n- Do not invent steps that are not visible in the HTML.\n\nReturn this structure only:\n# Developer Guide\n\n## 1. Project Overview\n## 2. Language Used\n## 3. Website Purpose\n## 4. User Flow\n\nUnder '\''User Flow'\'', return a Mermaid flowchart only.\n\nHere is the code:\n" + $content)
                   }
                 ]
               }
@@ -56,6 +56,10 @@ jobs:
           else
             cat docs/output.json > docs/developer-guide.md
           fi
+
+      - name: Fix Mermaid formatting
+        run: |
+          sed -i 's/``` mermaid/```mermaid/g' docs/developer-guide.md
 
       - name: Commit file
         run: |
