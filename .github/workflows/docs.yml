@@ -72,7 +72,7 @@ jobs:
           echo '    D --> E{Choose action}' >> docs/developer-guide.md
 
           i=0
-          grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' index.html | while IFS= read -r label; do
+          perl -0777 -pe 's/<!--.*?-->//gs' index.html | grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' | while IFS= read -r label; do
             i=$((i+1))
             node=$(printf '%s' "$label" | tr -cd '[:alnum:]' | cut -c1-12)
             [ -z "$node" ] && node="Action$i"
