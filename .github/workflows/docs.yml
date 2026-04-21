@@ -23,106 +23,69 @@ jobs:
 
       - name: Call OpenAI API
         run: |
-          # Read the HTML content
           CONTENT=$(cat index.html)
-          
-          # Create JSON payload using Python (more reliable)
-          python3 << 'EOF'
-          import json
-          import os
-          
-          # Read HTML content
-          with open('index.html', 'r') as f:
-              html_content = f.read()
-          
-          # Create the prompt
-          prompt = """Read this website code and generate a short developer guide in Markdown only.
 
-Important instructions:
-- Use exact visible labels from the HTML.
-- Do not replace exact labels with general words.
-- Do not invent features or steps that are not present in the HTML.
-- The Mermaid flowchart must show the user journey in sequence, starting from landing on the homepage, then viewing the profile content, then reaching the available action buttons or links.
-- If multiple buttons or links exist, show them as separate branches from one decision step.
-- Use the exact button and link labels as they appear in the HTML.
-- Include ALL buttons or links found in the HTML exactly as written.
-- Do not limit the flowchart to fixed examples.
-- Do not create isolated mini-flows. Keep one connected flowchart.
-
-Return this structure only:
-# Developer Guide
-
-## 1. Project Overview
-## 2. Language Used
-## 3. Website Purpose
-## 4. User Flow
-
-Under "User Flow", return a Mermaid flowchart only.
-
-Here is the code:"""
-          
-          # Create the request payload
-          payload = {
-              "model": "gpt-4o-mini",
-              "messages": [
+          jq -n --arg content "$CONTENT" '{
+            model: "gpt-4o-mini",
+            input: [
+              {
+                role: "user",
+                content: [
                   {
-                      "role": "user",
-                      "content": f"{prompt}\n\n{html_content}"
+                    type: "input_text",
+                    text: ("Read this website code and generate a short developer guide in Markdown only.\n\nReturn this structure only:\n# Developer Guide\n\n## 1. Project Overview\n## 2. Language Used\n## 3. Website Purpose\n\nRules:\n- Use exact visible labels from the HTML.\n- Do not invent features.\n- Do not include a flowchart.\n- Do not include a User Flow section.\n\nHere is the code:\n" + $content)
                   }
-              ],
-              "max_tokens": 2000,
-              "temperature": 0.7
-          }
-          
-          # Write to file
-          with open('docs/request.json', 'w') as f:
-              json.dump(payload, f, indent=2)
-          EOF
+                ]
+              }
+            ]
+          }' > docs/request.json
 
-          # Make the API call
-          curl -s https://api.openai.com/v1/chat/completions \
+          curl -s https://api.openai.com/v1/responses \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @docs/request.json > docs/output.json
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Generate file
+      - name: Generate developer guide
         run: |
-          # Extract the content from the response using Python
-          python3 << 'EOF'
-          import json
-          
-          try:
-              with open('docs/output.json', 'r') as f:
-                  response = json.load(f)
-              
-              # Extract the content
-              content = response.get('choices', [{}])[0].get('message', {}).get('content', '')
-              
-              if content:
-                  with open('docs/developer-guide.md', 'w') as f:
-                      f.write(content)
-                  print("✅ Developer guide generated successfully")
-              else:
-                  print("❌ No content found in response")
-                  print(json.dumps(response, indent=2))
-                  exit(1)
-          except Exception as e:
-              print(f"❌ Error: {e}")
-              exit(1)
-          EOF
+          TEXT=$(jq -r '.output[0].content[] | select(.type=="output_text") | .text' docs/output.json)
 
-      - name: Fix Mermaid formatting
+          if [ -n "$TEXT" ]; then
+            printf "%s\n" "$TEXT" > docs/developer-guide.md
+          else
+            echo "# Developer Guide" > docs/developer-guide.md
+            echo "" >> docs/developer-guide.md
+            echo "No valid output_text found." >> docs/developer-guide.md
+          fi
+
+      - name: Append exact Mermaid user flow
         run: |
-          sed -i 's/``` mermaid/```mermaid/g' docs/developer-guide.md
-          sed -i 's/````mermaid/```mermaid/g' docs/developer-guide.md
+          echo "" >> docs/developer-guide.md
+          echo "## 4. User Flow" >> docs/developer-guide.md
+          echo "" >> docs/developer-guide.md
+          echo '```mermaid' >> docs/developer-guide.md
+          echo 'flowchart TD' >> docs/developer-guide.md
+          echo '    A[User lands on homepage] --> B[View profile content]' >> docs/developer-guide.md
+          echo '    B --> C[Read About Me section]' >> docs/developer-guide.md
+          echo '    C --> D[View contact information]' >> docs/developer-guide.md
+          echo '    D --> E{Choose action}' >> docs/developer-guide.md
+
+          i=0
+          grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' index.html | while IFS= read -r label; do
+            i=$((i+1))
+            node=$(printf '%s' "$label" | tr -cd '[:alnum:]' | cut -c1-12)
+            [ -z "$node" ] && node="Action$i"
+            echo "    E -->|$label| ${node}[${label}]" >> docs/developer-guide.md
+          done
+
+          echo '```' >> docs/developer-guide.md
 
       - name: Commit file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash || true
-          git add docs/developer-guide.md docs/request.json docs/output.json
+          git pull --rebase --autostash
+          git add docs/developer-guide.md docs/output.json docs/request.json
           git commit -m "update developer guide" || echo "no changes"
-          git push || true
+          git push
