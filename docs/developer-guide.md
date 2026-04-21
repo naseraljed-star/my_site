@@ -1,15 +1,13 @@
-```markdown
 # Developer Guide
 
 ## 1. Project Overview
-This project is a personal website for Naser Aljed, showcasing his profile as a Cybersecurity Student. The site contains information about his interests and provides contact details.
+This project is a personal website for Naser Aljed, showcasing his journey as a Cybersecurity Student. The website includes a profile picture, a brief introduction, contact information, and links to external resources.
 
 ## 2. Language Used
-The website is built using HTML and CSS.
+The website is built using HTML and CSS for structure and styling.
 
 ## 3. Website Purpose
-The purpose of the website is to present Naser Aljed’s background in cybersecurity, highlight his interests in secure coding and CI/CD pipelines, and provide links to his contact information and social media profiles.
-```
+The purpose of the website is to provide information about Naser Aljed, his interests in cybersecurity, and to serve as a platform for potential contacts and connections through provided links.
 
 ## 4. User Flow
 
@@ -21,5 +19,4 @@ flowchart TD
     D --> E{Choose action}
     E -->|Open Google| OpenGoogle[Open Google]
     E -->|My GitHub| MyGitHub[My GitHub]
-    E -->|My LinkedIn| MyLinkedIn[My LinkedIn]
 ```
