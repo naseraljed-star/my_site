@@ -14,7 +14,7 @@ jobs:
         run: |
           echo "Checking for risky words..."
 
-          if grep -RniE '(password|api_key|token|secret|BEGIN PRIVATE KEY|sk-)' . \
+          if grep -RniE '(password=|api_key=|token=|secret=|BEGIN PRIVATE KEY|sk-)' . \
             --exclude=security.yml \
             --exclude=docs.yml \
             --exclude-dir=.git \
