@@ -11,17 +11,20 @@ permissions:
 
 jobs:
   docs:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    if: ${{ github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout latest main branch
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Create docs folder
         run: mkdir -p docs
 
-      - name: Call OpenAI API
+      - name: Generate clean docs when security passes
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         run: |
           CONTENT=$(cat index.html)
 
@@ -47,11 +50,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Generate developer guide
+      - name: Build developer guide from OpenAI output
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         run: |
           TEXT=$(jq -r '.output[0].content[] | select(.type=="output_text") | .text' docs/output.json)
 
-          if [ -n "$TEXT" ]; then
+          if [ -n "$TEXT" ] && [ "$TEXT" != "null" ]; then
             printf "%s\n" "$TEXT" > docs/developer-guide.md
           else
             echo "# Developer Guide" > docs/developer-guide.md
@@ -60,6 +64,7 @@ jobs:
           fi
 
       - name: Append exact Mermaid user flow
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         run: |
           echo "" >> docs/developer-guide.md
           echo "## 4. User Flow" >> docs/developer-guide.md
@@ -71,9 +76,7 @@ jobs:
           echo '    C --> D[View contact information]' >> docs/developer-guide.md
           echo '    D --> E{Choose action}' >> docs/developer-guide.md
 
-          i=0
-          perl -0777 -pe 's/<!--.*?-->//gs' index.html | grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' | while IFS= read -r label; do
-            i=$((i+1))
+          perl -0777 -pe 's/<!--.*?-->//gs' index.html | grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' | nl -w1 -s'|' | while IFS='|' read -r i label; do
             node=$(printf '%s' "$label" | tr -cd '[:alnum:]' | cut -c1-12)
             [ -z "$node" ] && node="Action$i"
             echo "    E -->|$label| ${node}[${label}]" >> docs/developer-guide.md
@@ -81,11 +84,22 @@ jobs:
 
           echo '```' >> docs/developer-guide.md
 
-      - name: Commit file
+      - name: Write blocked message when security fails
+        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          echo "# Developer Guide" > docs/developer-guide.md
+          echo "" >> docs/developer-guide.md
+          echo "Documentation generation blocked due to security policy violation." >> docs/developer-guide.md
+          echo "" >> docs/developer-guide.md
+          echo "Reason: the Security Check workflow did not pass." >> docs/developer-guide.md
+          echo "" > docs/output.json
+          echo "" > docs/request.json
+
+      - name: Commit updated docs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash
+          git pull --rebase --autostash origin main
           git add docs/developer-guide.md docs/output.json docs/request.json
-          git commit -m "update developer guide" || echo "no changes"
-          git push
+          git commit -m "update developer guide based on latest security status" || echo "no changes"
+          git push origin main
