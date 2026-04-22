@@ -2,9 +2,6 @@ name: Security Check
 
 on: [push]
 
-permissions:
-  contents: write
-
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -36,38 +33,3 @@ jobs:
           fi
 
           echo "Security check passed"
-
-  block_docs_on_failure:
-    needs: check
-    if: ${{ needs.check.result == 'failure' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Get code
-        uses: actions/checkout@v3
-
-      - name: Create docs folder
-        run: mkdir -p docs
-
-      - name: Replace developer guide with blocked message
-        run: |
-          cat > docs/developer-guide.md <<'EOF'
-          # Developer Guide
-
-          Documentation generation was blocked because the security check failed.
-
-          ## Status
-          A security violation was detected in the latest push.
-
-          ## Result
-          The flowchart and generated documentation are intentionally not shown until the violation is removed.
-          EOF
-
-      - name: Commit blocked guide
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash
-          git add docs/developer-guide.md
-          git commit -m "block docs due to security failure" || echo "no changes"
-          git push
