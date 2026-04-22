@@ -1,1 +1,72 @@
-
+{
+  "id": "resp_0ee994f8a4902eb50069e8d18c9f0481a19e57dbeb623b5b33",
+  "object": "response",
+  "created_at": 1776865676,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1776865679,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-4o-mini-2024-07-18",
+  "moderation": null,
+  "output": [
+    {
+      "id": "msg_0ee994f8a4902eb50069e8d18d753881a1828e83275b388b77",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "# Developer Guide\n\n## 1. Project Overview\nThis project is a personal portfolio website designed for Naser Aljed, showcasing his journey and interests in cybersecurity.\n\n## 2. Language Used\nThe website is built using HTML and CSS.\n\n## 3. Website Purpose\nThe purpose of the website is to serve as an online profile for Naser Aljed, a Cybersecurity Student, where he shares information about himself, his interests, and provides contact details."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 934,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 95,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1029
+  },
+  "user": null,
+  "metadata": {}
+}
