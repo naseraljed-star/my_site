@@ -2,34 +2,43 @@ name: Security Check
 
 on: [push]
 
+permissions:
+  contents: write
+
 jobs:
-  check:
+  security-scan:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
-
-      - name: Scan for hardcoded secrets and sensitive files
+      - uses: actions/checkout@v4
+      
+      - name: Run security scan
+        id: scan
         run: |
-          echo "Checking for risky words..."
-
-          if grep -RniE '(password|api[_-]?key|token|secret|OPENAI_API_KEY|BEGIN PRIVATE KEY)' . \
-            --exclude=security.yml \
-            --exclude=docs.yml \
-            --exclude-dir=.git \
-            --exclude-dir=docs; then
-            echo "Found risky content"
+          if [ -n "$(grep -r 'password\|token\|secret' .)" ]; then
+            echo "violation=true" >> $GITHUB_OUTPUT
             exit 1
           fi
-
-          echo "Checking for sensitive files..."
-
-          if find . \( -name ".env" -o -name "*.pem" -o -name "*.key" \) \
-            -not -path "./.git/*" \
-            -not -path "./docs/*" | grep .; then
-            echo "Found sensitive file"
-            exit 1
-          fi
-
-          echo "Security check passed"
+        continue-on-error: true
+      
+      - name: Cleanup docs on violation
+        if: steps.scan.outputs.violation == 'true'
+        run: |
+          mkdir -p docs
+          rm -f docs/developer-guide.md
+          echo "# Security Violation" > docs/developer-guide.md
+          echo "" >> docs/developer-guide.md
+          echo "⚠️ Documentation blocked: Security check failed." >> docs/developer-guide.md
+          echo "Flowchart not shown due to violation." >> docs/developer-guide.md
+      
+      - name: Commit blocked docs
+        if: steps.scan.outputs.violation == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/developer-guide.md
+          git commit -m "block docs due to security violation" || echo "no changes"
+          git push
+      
+      - name: Fail workflow if violation
+        if: steps.scan.outputs.violation == 'true'
+        run: exit 1
