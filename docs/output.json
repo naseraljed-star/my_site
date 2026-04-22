@@ -1,1 +1,72 @@
-
+{
+  "id": "resp_0dbd8158e553d3f60069e8d2a4dae0819da028785ea150a1f9",
+  "object": "response",
+  "created_at": 1776865956,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1776865958,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-4o-mini-2024-07-18",
+  "moderation": null,
+  "output": [
+    {
+      "id": "msg_0dbd8158e553d3f60069e8d2a598d0819d9cbe9465eef3efcf",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "# Developer Guide\n\n## 1. Project Overview\nThis project is a personal profile website for Naser Aljed, showcasing his journey as a Cybersecurity Student.\n\n## 2. Language Used\nThe website is built using HTML and CSS.\n\n## 3. Website Purpose\nThe purpose of the website is to present Naser Aljed's profile, his interests in cybersecurity, and ways for visitors to contact him and explore his GitHub."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 934,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 90,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1024
+  },
+  "user": null,
+  "metadata": {}
+}
