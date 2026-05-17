@@ -1,1 +1,72 @@
-
+{
+  "id": "resp_08f8cab4959574c8006a0a1cbb0e84819f85b20e74ed35bc63",
+  "object": "response",
+  "created_at": 1779047611,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1779047614,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-4o-mini-2024-07-18",
+  "moderation": null,
+  "output": [
+    {
+      "id": "msg_08f8cab4959574c8006a0a1cbca400819f980678472153379e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "# Developer Guide\n\n## 1. Project Overview\nThis project is a simple personal website for Naser Aljed, highlighting his status as a Cybersecurity Student. The website includes a profile image, an about section, and contact information, along with buttons linking to external resources.\n\n## 2. Language Used\nThe website is built using HTML and CSS.\n\n## 3. Website Purpose\nThe purpose of the website is to present Naser Aljed's profile, showcase his interests in cybersecurity, and provide contact options as well as links to external sites like Google and his GitHub repository."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 934,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 120,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1054
+  },
+  "user": null,
+  "metadata": {}
+}
