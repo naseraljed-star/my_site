@@ -1,144 +1,142 @@
-````yaml
 name: Generate Docs
 
 on:
-  workflow_run:
-    workflows: ["Security Check"]
-    types:
-      - completed
+workflow_run:
+workflows: ["Security Check"]
+types:
+- completed
 
 permissions:
-  contents: write
+contents: write
 
 jobs:
-  docs:
-    if: ${{ github.event.workflow_run.event == 'push' }}
-    runs-on: ubuntu-latest
+docs:
+if: ${{ github.event.workflow_run.event == 'push' }}
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout latest main branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
+````
+steps:
+  - name: Checkout latest main branch
+    uses: actions/checkout@v4
+    with:
+      ref: main
 
-      - name: Create docs folder
-        run: mkdir -p docs
+  - name: Create docs folder
+    run: mkdir -p docs
 
-      - name: Generate clean docs when security passes
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          set -euo pipefail
+  - name: Generate clean docs when security passes
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    run: |
+      set -euo pipefail
 
-          CONTENT=$(cat index.html)
+      CONTENT=$(cat index.html)
 
-          jq -n --arg content "$CONTENT" '{
-            model: "gpt-4o-mini",
-            input: [
+      jq -n --arg content "$CONTENT" '{
+        model: "gpt-4o-mini",
+        input: [
+          {
+            role: "user",
+            content: [
               {
-                role: "user",
-                content: [
-                  {
-                    type: "input_text",
-                    text: (
-                      "Read this website code and generate a short developer guide in Markdown only.\n\n" +
-                      "Return this structure only:\n" +
-                      "# Developer Guide\n\n" +
-                      "## 1. Project Overview\n" +
-                      "## 2. Language Used\n" +
-                      "## 3. Website Purpose\n\n" +
-                      "Rules:\n" +
-                      "- Use exact visible labels from the HTML.\n" +
-                      "- Do not invent features.\n" +
-                      "- Do not include a flowchart.\n" +
-                      "- Do not include a User Flow section.\n\n" +
-                      "Here is the code:\n" + $content
-                    )
-                  }
-                ]
+                type: "input_text",
+                text: (
+                  "Read this website code and generate a short developer guide in Markdown only.\n\n" +
+                  "Return this structure only:\n" +
+                  "# Developer Guide\n\n" +
+                  "## 1. Project Overview\n" +
+                  "## 2. Language Used\n" +
+                  "## 3. Website Purpose\n\n" +
+                  "Rules:\n" +
+                  "- Use exact visible labels from the HTML.\n" +
+                  "- Do not invent features.\n" +
+                  "- Do not include a flowchart.\n" +
+                  "- Do not include a User Flow section.\n\n" +
+                  "Here is the code:\n" + $content
+                )
               }
             ]
-          }' > docs/request.json
+          }
+        ]
+      }' > docs/request.json
 
-          curl -sS --fail-with-body \
-            --retry 2 \
-            --retry-delay 2 \
-            https://api.openai.com/v1/responses \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -d @docs/request.json \
-            -o docs/output.json
+      curl -sS --fail-with-body \
+        https://api.openai.com/v1/responses \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $OPENAI_API_KEY" \
+        -d @docs/request.json \
+        -o docs/output.json
 
-          if [ ! -s docs/output.json ]; then
-            echo "OpenAI returned an empty response."
-            exit 1
-          fi
+      if [ ! -s docs/output.json ]; then
+        echo "OpenAI returned an empty response."
+        exit 1
+      fi
 
-          if jq -e '.error' docs/output.json > /dev/null; then
-            echo "OpenAI API error:"
-            jq -r '.error.message // "Unknown OpenAI API error"' docs/output.json
-            exit 1
-          fi
+      if jq -e '.error' docs/output.json > /dev/null; then
+        echo "OpenAI API error:"
+        jq -r '.error.message // "Unknown OpenAI API error"' docs/output.json
+        exit 1
+      fi
 
-          if ! jq -e '.output and (.output | length > 0)' docs/output.json > /dev/null; then
-            echo "OpenAI response did not contain an output field."
-            exit 1
-          fi
+      if ! jq -e '.output and (.output | length > 0)' docs/output.json > /dev/null; then
+        echo "OpenAI response did not contain an output field."
+        exit 1
+      fi
 
-      - name: Build developer guide from OpenAI output
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        run: |
-          set -euo pipefail
+  - name: Build developer guide from OpenAI output
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    run: |
+      set -euo pipefail
 
-          TEXT=$(jq -er '
-            [
-              .output[]?.content[]?
-              | select(.type == "output_text")
-              | .text
-            ]
-            | join("\n")
-          ' docs/output.json)
+      TEXT=$(jq -er '
+        [
+          .output[]?.content[]?
+          | select(.type == "output_text")
+          | .text
+        ]
+        | join("\n")
+      ' docs/output.json)
 
-          printf "%s\n" "$TEXT" > docs/developer-guide.md
+      printf "%s\n" "$TEXT" > docs/developer-guide.md
 
-      - name: Append exact Mermaid user flow
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        run: |
-          echo "" >> docs/developer-guide.md
-          echo "## 4. User Flow" >> docs/developer-guide.md
-          echo "" >> docs/developer-guide.md
-          echo '```mermaid' >> docs/developer-guide.md
-          echo 'flowchart TD' >> docs/developer-guide.md
-          echo '    A[User lands on homepage] --> B[View profile content]' >> docs/developer-guide.md
-          echo '    B --> C[Read About Me section]' >> docs/developer-guide.md
-          echo '    C --> D[View contact information]' >> docs/developer-guide.md
-          echo '    D --> E{Choose action}' >> docs/developer-guide.md
+  - name: Append Mermaid user flow
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    run: |
+      echo "" >> docs/developer-guide.md
+      echo "## 4. User Flow" >> docs/developer-guide.md
+      echo "" >> docs/developer-guide.md
+      echo '```mermaid' >> docs/developer-guide.md
+      echo 'flowchart TD' >> docs/developer-guide.md
+      echo '    A[User lands on homepage] --> B[View profile content]' >> docs/developer-guide.md
+      echo '    B --> C[Read About Me section]' >> docs/developer-guide.md
+      echo '    C --> D[View contact information]' >> docs/developer-guide.md
+      echo '    D --> E{Choose action}' >> docs/developer-guide.md
 
-          perl -0777 -pe 's/<!--.*?-->//gs' index.html | grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' | nl -w1 -s'|' | while IFS='|' read -r i label; do
-            node=$(printf '%s' "$label" | tr -cd '[:alnum:]' | cut -c1-12)
-            [ -z "$node" ] && node="Action$i"
-            echo "    E -->|$label| ${node}[${label}]" >> docs/developer-guide.md
-          done
+      perl -0777 -pe 's/<!--.*?-->//gs' index.html | grep -oP '<a[^>]*class="btn"[^>]*>\K[^<]+' | nl -w1 -s'|' | while IFS='|' read -r i label; do
+        node=$(printf '%s' "$label" | tr -cd '[:alnum:]' | cut -c1-12)
+        [ -z "$node" ] && node="Action$i"
+        echo "    E -->|$label| ${node}[${label}]" >> docs/developer-guide.md
+      done
 
-          echo '```' >> docs/developer-guide.md
+      echo '```' >> docs/developer-guide.md
 
-      - name: Write blocked message when security fails
-        if: ${{ github.event.workflow_run.conclusion != 'success' }}
-        run: |
-          echo "# Developer Guide" > docs/developer-guide.md
-          echo "" >> docs/developer-guide.md
-          echo "Documentation generation blocked due to security policy violation." >> docs/developer-guide.md
-          echo "" >> docs/developer-guide.md
-          echo "Reason: the Security Check workflow did not pass." >> docs/developer-guide.md
+  - name: Write blocked message when security fails
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    run: |
+      echo "# Developer Guide" > docs/developer-guide.md
+      echo "" >> docs/developer-guide.md
+      echo "Documentation generation blocked due to security policy violation." >> docs/developer-guide.md
+      echo "" >> docs/developer-guide.md
+      echo "Reason: the Security Check workflow did not pass." >> docs/developer-guide.md
 
-      - name: Commit updated developer guide
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  - name: Commit updated developer guide
+    run: |
+      git config user.name "github-actions[bot]"
+      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git pull --rebase --autostash origin main
-          git add docs/developer-guide.md
-          git commit -m "update developer guide based on latest security status" || echo "no changes"
-          git push origin main
+      git pull --rebase --autostash origin main
+      git add docs/developer-guide.md
+      git commit -m "update developer guide based on latest security status" || echo "no changes"
+      git push origin main
 ````
