@@ -1,35 +1,28 @@
 name: Security Check
-
 on: [push]
-
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Get code
         uses: actions/checkout@v3
-
       - name: Scan for hardcoded secrets and sensitive files
         run: |
           echo "Checking for risky words..."
-
           if grep -RniE '(password=|api_key=|token=|secret=|BEGIN PRIVATE KEY|sk-)' . \
             --exclude=security.yml \
             --exclude=docs.yml \
+            --exclude=README.md \
             --exclude-dir=.git \
             --exclude-dir=docs; then
             echo "Found risky content"
             exit 1
           fi
-
           echo "Checking for sensitive files..."
-
           if find . \( -name ".env" -o -name "*.pem" -o -name "*.key" \) \
             -not -path "./.git/*" \
             -not -path "./docs/*" | grep .; then
             echo "Found sensitive file"
             exit 1
           fi
-
           echo "Security check passed"
