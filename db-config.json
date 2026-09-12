@@ -1,5 +1,0 @@
-{
-  "db_host": "localhost",
-  "db_user": "admin",
-  "connection_string": "password=SuperSecret123!"
-}
