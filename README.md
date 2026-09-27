@@ -1,4 +1,4 @@
-# My Site
+# Securing AI-Powered Documentation in CI/CD Pipelines
 
 Project developed and maintained by Naser Aljed as part of MSc research in securing AI-integrated CI/CD pipelines.
 
